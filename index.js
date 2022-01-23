@@ -1,6 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const path = require('path')
+const dotenv = require("dotenv");
+dotenv.config();
 
 const authRoutes = require('./routes/auth');
 const tweetRoutes = require('./routes/tweet');
@@ -10,8 +12,7 @@ require('./db/connection.js')
 
 // initialize express app
 const app = express();
-const dotenv = require("dotenv");
-dotenv.config();
+
 const PORT = process.env.PORT || 5000;
 
 app.use(bodyParser.json()) // Initialize boday parser middleware. we are using json data in app.
