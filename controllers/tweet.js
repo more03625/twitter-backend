@@ -1,4 +1,5 @@
 const Tweet = require('../models/tweet');
+const Follow = require('../models/follow');
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const { sendResponse } = require('../lib/sendResponse');
@@ -57,7 +58,7 @@ exports.createTweet = async (req, res) => {
     }
 }
 exports.getTweets = async (req, res) => {
-
+    console.log('MKBHD HERE');
     let { page, size } = req.query;
 
     if (!page) {
@@ -84,24 +85,49 @@ exports.getTweets = async (req, res) => {
             status: 1
         }
     }
-    let requiredFeilds = { 'name': 1, 'email': 1, '_id': 1, 'profileImage': 1 }
-    const tweets = await Tweet.find(condition).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
 
-    const count = await Tweet.countDocuments(condition);
-    if (tweets) {
+
+
+    // const followings = await Follower.find({ userId: req.userId });
+    // const followingIds = followings.map(f => f.followingId);
+    // const posts = await Post.find({ userId: { $in: followingIds } });
+    let requiredFeilds = { 'name': 1, 'email': 1, '_id': 1, 'profileImage': 1 }
+
+    const token = req.headers.authorization;
+    const decode = jwt.decode(token.split(" ")[1]);
+
+
+    const followings = await Follow.find({ follower: decode.id });
+    const iAmFollowingTo = followings.map(f => f.following);
+
+    const tweetsBy = await Tweet.find({ createdBy: { $in: iAmFollowingTo } }).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
+
+    if (tweetsBy) {
         return res.status(200).json({
             error: false,
             title: "Tweets fetched successfully!",
-            count,
-            data: tweets,
+            data: tweetsBy,
         });
     } else {
-        return res.status(422).json({
-            error: true,
-            title: 'Unable to fetch tweets!',
-            data: null
-        })
+        const tweets = await Tweet.find(condition).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
+        const count = await Tweet.countDocuments(condition);
+        if (tweets) {
+            return res.status(200).json({
+                error: false,
+                title: "Tweets fetched successfully!",
+                count,
+                data: tweets,
+            });
+        } else {
+            return res.status(422).json({
+                error: true,
+                title: 'Unable to fetch tweets!',
+                data: null
+            })
+        }
     }
+
+
 }
 exports.getTweetByID = async (req, res) => {
 
