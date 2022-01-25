@@ -44,3 +44,34 @@ exports.follow = async (req, res) => {
         }
     }
 }
+exports.isFollowing = async (req, res) => {
+    const results = validationResult(req);
+    if (results.errors.length > 0) {
+        return res.status(200).json({
+            error: true,
+            title: results.errors[0].msg,
+            errors: results
+        });
+    }
+    const token = req.headers.authorization;
+    const decode = jwt.decode(token.split(" ")[1]);
+
+    let followData = {
+        follower: decode.id,
+        following: req.body.following
+    }
+    const isFollowing = await Follow.findOne(followData);
+    if (isFollowing) {
+        return res.status(200).json({
+            error: false,
+            title: "You are following to this user",
+            isFollowing: true,
+        })
+    } else {
+        return res.status(200).json({
+            error: false,
+            title: "You are not following to this user!",
+            isFollowing: false
+        })
+    }
+}

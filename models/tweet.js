@@ -3,21 +3,22 @@ const mongoose = require('mongoose');
 const tweetSchema = new mongoose.Schema({
     tweet: {
         type: String,
-        required: true,
+        required: false,
         trim: true
     },
     images: {
         type: Array,
         required: false
     },
-    createdBy:{
-        type:String,
-        required:true
+    createdBy: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'User',
+        required: true
     },
-    status:{
-        type:Number,
-        default:1,
-        enum:[1,2]
+    status: {
+        type: Number,
+        default: 1,
+        enum: [1, 2]
     }
 }, { timestamps: true });
 

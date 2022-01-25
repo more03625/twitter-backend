@@ -4,7 +4,7 @@ const User = require('../models/user');
 const authenticateUser = async (req, res, next) => {
     const token = req.headers.authorization;
     // const decoded = jwt.decode(token.split(" ")[1]);
-
+    console.log('token ===> ', token);
     if (!token) {
         res.status(401).json({
             title: "You are not authenticated to perform this action!",
