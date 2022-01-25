@@ -64,7 +64,7 @@ exports.isFollowing = async (req, res) => {
     if (isFollowing) {
         return res.status(200).json({
             error: false,
-            title: "You are following to this user",
+            title: "You are following to this user!",
             isFollowing: true,
         })
     } else {
