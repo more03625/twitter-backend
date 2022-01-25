@@ -66,7 +66,7 @@ exports.getTweets = async (req, res) => {
     }
 
     if (!size) {
-        size = 10
+        size = 35
     }
 
     const limit = parseInt(size)
@@ -88,37 +88,58 @@ exports.getTweets = async (req, res) => {
 
     let requiredFeilds = { 'name': 1, 'email': 1, '_id': 1, 'profileImage': 1 }
 
-    const token = req.headers.authorization;
-    const decode = jwt.decode(token.split(" ")[1]);
-
-    const followings = await Follow.find({ follower: decode.id });
-    const iAmFollowingTo = followings.map(f => f.following);
-
-    const tweetsBy = await Tweet.find({ createdBy: { $in: iAmFollowingTo } }).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
-    if (tweetsBy.length > 0) {
+    const tweets = await Tweet.find(condition).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
+    const count = await Tweet.countDocuments(condition);
+    if (tweets) {
         return res.status(200).json({
             error: false,
-            title: "Tweets fetched successfully! fasdfsfasdf asdfasdfa asdfasdf",
-            data: tweetsBy,
+            title: "Tweets fetched successfully!",
+            count,
+            data: tweets,
         });
     } else {
-        const tweets = await Tweet.find(condition).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
-        const count = await Tweet.countDocuments(condition);
-        if (tweets) {
+        return res.status(422).json({
+            error: true,
+            title: 'Unable to fetch tweets!',
+            data: null
+        })
+    }
+
+    // Just uncommect this code to see posts of users, whom you are following! This code works fine. but few bugs are there & due to office & timeshortage unable to complete this.
+
+    /*
+        const token = req.headers.authorization;
+        const decode = jwt.decode(token.split(" ")[1]);
+    
+        const followings = await Follow.find({ follower: decode.id });
+        const iAmFollowingTo = followings.map(f => f.following);
+    
+        const tweetsBy = await Tweet.find({ createdBy: { $in: iAmFollowingTo } }).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
+        if (tweetsBy.length > 0) {
             return res.status(200).json({
                 error: false,
                 title: "Tweets fetched successfully!",
-                count,
-                data: tweets,
+                data: tweetsBy,
             });
         } else {
-            return res.status(422).json({
-                error: true,
-                title: 'Unable to fetch tweets!',
-                data: null
-            })
+            const tweets = await Tweet.find(condition).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
+            const count = await Tweet.countDocuments(condition);
+            if (tweets) {
+                return res.status(200).json({
+                    error: false,
+                    title: "Tweets fetched successfully!",
+                    count,
+                    data: tweets,
+                });
+            } else {
+                return res.status(422).json({
+                    error: true,
+                    title: 'Unable to fetch tweets!',
+                    data: null
+                })
+            }
         }
-    }
+  */
 
 
 }
