@@ -86,26 +86,19 @@ exports.getTweets = async (req, res) => {
         }
     }
 
-
-
-    // const followings = await Follower.find({ userId: req.userId });
-    // const followingIds = followings.map(f => f.followingId);
-    // const posts = await Post.find({ userId: { $in: followingIds } });
     let requiredFeilds = { 'name': 1, 'email': 1, '_id': 1, 'profileImage': 1 }
 
     const token = req.headers.authorization;
     const decode = jwt.decode(token.split(" ")[1]);
 
-
     const followings = await Follow.find({ follower: decode.id });
     const iAmFollowingTo = followings.map(f => f.following);
 
     const tweetsBy = await Tweet.find({ createdBy: { $in: iAmFollowingTo } }).populate('createdBy', requiredFeilds).skip(skip).limit(limit).sort({ createdAt: -1 });
-
-    if (tweetsBy) {
+    if (tweetsBy.length > 0) {
         return res.status(200).json({
             error: false,
-            title: "Tweets fetched successfully!",
+            title: "Tweets fetched successfully! fasdfsfasdf asdfasdfa asdfasdf",
             data: tweetsBy,
         });
     } else {
